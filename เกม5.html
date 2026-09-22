@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมที่ 5: จับคู่ให้ปัง เลือกสื่อให้ใช่ | IT Pro Mission</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #090d16 0%, #1e1b4b 40%, #4c1d95 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --primary: #7c3aed;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --accent-yellow: #f59e0b;
+            --accent-lime: #10b981;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --font-head: 'Poppins', 'Sarabun', sans-serif;
+            --font-body: 'Sarabun', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ตกแต่งแสงนีออนฉูดฉาด */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            opacity: 0.5;
+        }
+        body::before { background: var(--accent-cyan); top: -100px; left: -100px; }
+        body::after { background: var(--accent-pink); bottom: -100px; right: -100px; }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 30px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(236, 72, 153, 0.4) inset;
+            width: 100%;
+            max-width: 820px;
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(20px);
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .screen { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .screen.active { display: block; opacity: 1; }
+
+        .hero-icon { font-size: 4.5rem; text-align: center; margin-bottom: 5px; animation: bounceIcon 2s infinite ease-in-out; }
+        @keyframes bounceIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        h1 {
+            font-family: var(--font-head);
+            font-size: 2.2rem;
+            text-align: center;
+            background: linear-gradient(90deg, #06b6d4, #7c3aed, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+            font-weight: 900;
+        }
+
+        .subtitle { text-align: center; color: var(--text-muted); font-size: 1.05rem; margin-bottom: 20px; font-weight: 600; }
+
+        .rules-card {
+            background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%);
+            border: 2px dashed #d946ef;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .rules-card h3 {
+            font-family: var(--font-head);
+            color: #c026d3;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rules-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .rules-card li { font-size: 0.95rem; color: #4b5563; display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .rules-card li::before { content: '🎯'; }
+
+        .btn {
+            background: linear-gradient(135deg, #06b6d4 0%, #7c3aed 50%, #ec4899 100%);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 18px;
+            font-size: 1.15rem;
+            font-family: var(--font-head);
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(236, 72, 153, 0.5); filter: brightness(1.05); }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 12px 18px;
+            border-radius: 14px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .badge {
+            font-family: var(--font-head);
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #334155;
+        }
+        .badge.score { color: #7c3aed; }
+        .badge.timer-text { color: #ec4899; }
+
+        .timer-container {
+            width: 100%;
+            background: #e2e8f0;
+            height: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #06b6d4, #10b981, #ec4899);
+            border-radius: 6px;
+            transition: width 1s linear;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            border: 2px solid #86efac;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08);
+            text-align: center;
+        }
+        .scenario-title { font-family: var(--font-head); font-size: 1.05rem; color: #059669; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800; }
+        .scenario-content { font-size: 1.25rem; font-weight: 700; color: #0f172a; padding: 10px; }
+
+        /* Workspace Grid */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        @media(max-width: 650px) { .workspace-grid { grid-template-columns: 1fr; } }
+
+        .panel-box {
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 18px;
+            padding: 14px;
+            min-height: 230px;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-title { font-family: var(--font-head); font-size: 1rem; color: #475569; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-weight: 700; }
+
+        /* Media Choice Cards */
+        .media-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+            min-height: 160px;
+        }
+        .media-card {
+            background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+            border: 2px solid #d8b4fe;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: grab;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+            color: #1e293b;
+        }
+        .media-card:active { cursor: grabbing; }
+        .media-card:hover { border-color: #7c3aed; background: #f3e8ff; transform: translateY(-2px); }
+        .media-card.dragging { opacity: 0.4; }
+
+        /* Drop Zone */
+        .drop-zone {
+            flex-grow: 1;
+            border: 3px dashed #38bdf8;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 14px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 180px;
+            transition: background 0.2s;
+        }
+        .drop-zone.drag-over { background: #bae6fd; border-color: #0284c7; }
+        .drop-placeholder {
+            color: #0284c7;
+            font-size: 0.95rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* Result Screen Styles */
+        .result-container { text-align: center; }
+        .trophy-icon { font-size: 4rem; margin-bottom: 2px; }
+        .score-display-box {
+            background: linear-gradient(135deg, #fdf4ff 0%, #e0f2fe 100%);
+            border-radius: 20px;
+            padding: 18px;
+            margin: 12px 0;
+            border: 2px solid #06b6d4;
+        }
+        .score-number { font-family: var(--font-head); font-size: 3rem; font-weight: 900; color: #0284c7; line-height: 1; }
+        .score-total { font-size: 0.95rem; color: #6b7280; font-weight: 700; margin-top: 4px; }
+        .evaluation-badge {
+            font-family: var(--font-head);
+            font-size: 1.15rem;
+            font-weight: 800;
+            padding: 10px 22px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 15px;
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+        .review-section {
+            text-align: left;
+            background: #fff1f2;
+            border: 2px solid #fecdd3;
+            border-radius: 18px;
+            padding: 18px;
+            margin-top: 12px;
+            margin-bottom: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .review-section h3 { font-family: var(--font-head); color: #e11d48; font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .review-item {
+            background: #ffffff;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 5px solid #ec4899;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .perfect-score-msg {
+            background: #ecfdf5;
+            border: 2px solid #a7f3d0;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 16px;
+            font-family: var(--font-head);
+            font-weight: 800;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. หน้าแรก -->
+        <div id="start-screen" class="screen active">
+            <div class="hero-icon">📊🎬📝💻</div>
+            <h1>เกมที่ 5 : “จับคู่ให้ปัง เลือกสื่อให้ใช่”</h1>
+            <p class="subtitle">ภารกิจเลือกรูปแบบสื่อให้เหมาะสมกับวัตถุประสงค์ (หน่วยการเรียนรู้ไอที)</p>
+            
+            <div class="rules-card">
+                <h3>📌 กติกาภารกิจเลือกสื่อ:</h3>
+                <ul>
+                    <li>ทั้งหมด 10 สถานการณ์ (คะแนนเต็ม 150 คะแนน)</li>
+                    <li>⏱️ จำกัดเวลาข้อละ 15 วินาทีเท่านั้น!</li>
+                    <li>🧩 <b>ลากรูปแบบสื่อ (บล็อก / วิดีโอ / อินโฟกราฟิก)</b> ไปวางจับคู่ให้ตรงกับโจทย์</li>
+                    <li>⭐ ตอบถูก +10 คะแนน (ทำเร็วใน 5 วิฯ รับโบนัส +5) | ตอบผิด -5 คะแนน</li>
+                    <li>💡 <b>เฉลยข้อที่ผิดพร้อมเหตุผลสรุปทั้งหมดจะแสดงที่หน้าจอสุดท้ายทีเดียว!</b></li>
+                </ul>
+            </div>
+            
+            <button class="btn" onclick="startGame()">
+                🚀 เริ่มลุยภารกิจจับคู่เลย!
+            </button>
+        </div>
+
+        <!-- 2. หน้าเล่นเกม -->
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="badge" id="stage-indicator"><span>🎯</span> ข้อที่ 1/10</div>
+                <div class="badge timer-text" id="timer-display">⏳ 15 วินาที</div>
+                <div class="badge score" id="score-display">⭐ คะแนน: 0</div>
+            </div>
+            
+            <div class="timer-container">
+                <div id="timer-fill" class="timer-fill"></div>
+            </div>
+            
+            <div class="scenario-box">
+                <div class="scenario-title"><span>📌</span> สถานการณ์เป้าหมาย:</div>
+                <div id="scenario-content" class="scenario-content">กำลังโหลดสถานการณ์...</div>
+            </div>
+
+            <div class="workspace-grid">
+                <!-- ตัวเลือกสื่อ (ต้นทาง) -->
+                <div class="panel-box">
+                    <div class="panel-title"><span>📦</span> รูปแบบสื่อ (ลากไปขวา)</div>
+                    <div id="media-source" class="media-list" ondragover="allowDrop(event)" ondragleave="removeDropStyle(event)" ondrop="dropToSource(event)">
+                        <!-- รายการสื่อสร้างด้วย JS -->
+                    </div>
+                </div>
+
+                <!-- ช่องวางจับคู่ (ปลายทาง) -->
+                <div class="panel-box">
+                    <div class="panel-title"><span>🎯</span> ช่องจับคู่สื่อ</div>
+                    <div id="drop-zone" class="drop-zone" ondragover="allowDrop(event)" ondragleave="removeDropStyle(event)" ondrop="dropToTarget(event)">
+                        <div class="drop-placeholder">ลากสื่อมาวางที่นี่เพื่อจับคู่</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="submitAnswer()">
+                ยืนยันการจับคู่ ➔
+            </button>
+        </div>
+
+        <!-- 3. หน้าสรุปผล -->
+        <div id="result-screen" class="screen">
+            <div class="result-container">
+                <div class="trophy-icon" id="result-emoji">🏆</div>
+                <h2 style="font-family: var(--font-head); color: #1e293b; font-size: 1.6rem; margin-bottom: 2px;">สรุปผลภารกิจเลือกสื่อ!</h2>
+                <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 10px;">สรุปคะแนนรวมและเฉลยข้อที่ต้องทบทวน</p>
+
+                <div class="score-display-box">
+                    <div class="score-number" id="final-score">0</div>
+                    <div class="score-total">จากคะแนนเต็ม 150 คะแนน</div>
+                </div>
+
+                <div id="evaluation-text" class="evaluation-badge">ระดับความเชี่ยวชาญ</div>
+
+                <div id="review-container"></div>
+
+                <div style="font-size: 0.92rem; color: var(--text-muted); margin-top: 12px;">
+                    ⏱️ เวลาที่ใช้ทั้งหมด: <b id="total-time" style="color: var(--text-main);">0 นาที 0 วินาที</b>
+                </div>
+
+                <button class="btn" onclick="startGame()">
+                    🔄 เล่นใหม่อีกรอบ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                scenario: "“ต้องการอธิบายวิธีใช้โปรแกรมทีละขั้นตอนให้ผู้ชมเห็นการใช้งานจริง”",
+                correctMedia: "🎬 วิดีโอ",
+                reason: "วิดีโอมีความโดดเด่นในการแสดงภาพเคลื่อนไหวและขั้นตอนการปฏิบัติจริง ช่วยให้ผู้ชมทำตามได้ง่าย"
+            },
+            {
+                id: 2,
+                scenario: "“ต้องการสรุปข้อมูลสถิติผลการสำรวจให้คนอ่านเข้าใจภาพรวมภายในเวลาอันสั้น”",
+                correctMedia: "📊 อินโฟกราฟิก",
+                reason: "อินโฟกราฟิกช่วยย่อยข้อมูลตัวเลขและสถิติที่ซับซ้อนให้กลายเป็นภาพกราฟิกที่เข้าใจง่ายในแวบเดียว"
+            },
+            {
+                id: 3,
+                scenario: "“ต้องการเขียนเล่าเรื่องราวประสบการณ์การเดินทางท่องเที่ยวอย่างละเอียดพร้อมแทรกภาพประกอบ”",
+                correctMedia: "📝 บล็อก",
+                reason: "บล็อก (Blog) เหมาะสำหรับงานเขียนเนื้อหายาวๆ ที่มีการเรียบเรียงเนื้อหาเป็นหมวดหมู่และเล่าเรื่องราวได้อย่างเจาะลึก"
+            },
+            {
+                id: 4,
+                scenario: "“ต้องการนำเสนอคลิปสอนทักษะการเขียนโค้ดสั้นๆ พร้อมอัปโหลดให้คนเข้ามาคอมเมนต์พูดคุย”",
+                correctMedia: "🎬 วิดีโอ",
+                reason: "การอัปโหลดวิดีโอบนแพลตฟอร์มดิจิทัลเอื้อต่อการสาธิตเชิงปฏิบัติการและการมีส่วนร่วมของผู้ชมผ่านคอมเมนต์"
+            },
+            {
+                id: 5,
+                scenario: "“ต้องการเปรียบเทียบข้อดีและข้อเสียของการเลือกใช้เทคโนโลยีคลาวด์ให้เข้าใจง่ายในภาพเดียว”",
+                correctMedia: "📊 อินโฟกราฟิก",
+                reason: "อินโฟกราฟิกเหมาะสำหรับการเปรียบเทียบข้อมูลสรุปสั้นๆ (Pros & Cons) ด้วยโครงสร้างภาพที่เป็นระบบ"
+            },
+            {
+                id: 6,
+                scenario: "“ต้องการเขียนบทความรีวิวอุปกรณ์ไอทีเจาะลึกสเปก พร้อมลิงก์ดาวน์โหลดไดรเวอร์ประกอบ”",
+                correctMedia: "📝 บล็อก",
+                reason: "บล็อกช่วยให้สามารถใส่ลิงก์เชื่อมโยง (Hyperlinks) และเนื้อหาบรรยายขนาดยาวได้อย่างยืดหยุ่น"
+            },
+            {
+                id: 7,
+                scenario: "“ต้องการทำคลิปสั้นโปรโมทกิจกรรมโรงเรียนให้มีความน่าตื่นเต้นและเข้าถึงวัยรุ่นได้รวดเร็ว”",
+                correctMedia: "🎬 วิดีโอ",
+                reason: "วิดีโอสั้นดึงดูดความสนใจได้ดี สร้างอารมณ์ร่วมและยอดแชร์บนโซเชียลมีเดียได้อย่างรวดเร็ว"
+            },
+            {
+                id: 8,
+                scenario: "“ต้องการนำเสนอขั้นตอนการปฏิบัติตัวเมื่อเกิดภัยพิบัติทางธรรมชาติให้จดจำง่ายในแผ่นเดียว”",
+                correctMedia: "📊 อินโฟกราฟิก",
+                reason: "อินโฟกราฟิกใช้ภาพไอคอนและข้อความสั้นๆ ช่วยให้ผู้รับสารจดจำขั้นตอนสำคัญได้อย่างรวดเร็วในยามฉุกเฉิน"
+            },
+            {
+                id: 9,
+                scenario: "“ต้องการเผยแพร่บทความวิชาการสะท้อนมุมมองปัญญาประดิษฐ์ (AI) พร้อมเปิดรับฟังความคิดเห็นระยะยาว”",
+                correctMedia: "📝 บล็อก",
+                reason: "การเขียนบล็อกเอื้อต่อการทำเนื้อหาเชิงบทความวิชาการที่มีพื้นที่สำหรับช่องแสดงความคิดเห็นและการอัปเดตบทความ"
+            },
+            {
+                id: 10,
+                scenario: "“ต้องการสรุปไทม์ไลน์ประวัติศาสตร์คอมพิวเตอร์ตั้งแต่ยุคแรกจนถึงปัจจุบันให้เห็นลำดับเวลาชัดเจน”",
+                correctMedia: "📊 อินโฟกราฟิก",
+                reason: "อินโฟกราฟิกมีรูปแบบการนำเสนอแบบลำดับเวลา (Timeline) ที่ช่วยให้มองเห็นวิวัฒนาการได้อย่างต่อเนื่องชัดเจน"
+            }
+        ];
+
+        const allMediaOptions = [
+            { id: 'm1', name: '📝 บล็อก' },
+            { id: 'm2', name: '🎬 วิดีโอ' },
+            { id: 'm3', name: '📊 อินโฟกราฟิก' }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let mistakesLog = [];
+        let timer;
+        let timeLeft = 15;
+        let totalStartTime;
+        let draggedElement = null;
+
+        function startGame() {
+            currentIndex = 0;
+            score = 0;
+            mistakesLog = [];
+            totalStartTime = new Date();
+
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timer);
+            if (currentIndex >= questions.length) {
+                endGame();
+                return;
+            }
+
+            timeLeft = 15;
+            updateTimerDisplay();
+
+            const q = questions[currentIndex];
+            document.getElementById('stage-indicator').innerHTML = `<span>🎯</span> ข้อที่ ${currentIndex + 1}/10`;
+            document.getElementById('score-display').innerHTML = `⭐ คะแนน: ${score}`;
+            document.getElementById('scenario-content').innerText = q.scenario;
+
+            // รีเซ็ตการวาง
+            const sourceBox = document.getElementById('media-source');
+            const dropZone = document.getElementById('drop-zone');
+            sourceBox.innerHTML = '';
+            dropZone.innerHTML = '<div class="drop-placeholder">ลากสื่อมาวางที่นี่เพื่อจับคู่</div>';
+
+            // สุ่มลำดับสื่อ
+            let shuffledMedia = [...allMediaOptions].sort(() => Math.random() - 0.5);
+            shuffledMedia.forEach(m => {
+                sourceBox.appendChild(createMediaCard(m));
+            });
+
+            startTimer();
+        }
+
+        function createMediaCard(media) {
+            const div = document.createElement('div');
+            div.className = 'media-card';
+            div.draggable = true;
+            div.dataset.name = media.name;
+            div.innerHTML = `<span>📂</span> ${media.name}`;
+
+            div.addEventListener('dragstart', (e) => {
+                draggedElement = div;
+                div.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', media.name);
+            });
+
+            div.addEventListener('dragend', () => {
+                div.classList.remove('dragging');
+                draggedElement = null;
+                checkPlaceholder();
+            });
+
+            return div;
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function removeDropStyle(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function dropToTarget(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            if (draggedElement) {
+                const dropZone = document.getElementById('drop-zone');
+                // ถ้ามีตัวเดิมอยู่แล้ว ให้ส่งกลับซ้าย
+                const existing = dropZone.querySelector('.media-card');
+                if (existing) {
+                    document.getElementById('media-source').appendChild(existing);
+                }
+                dropZone.innerHTML = '';
+                dropZone.appendChild(draggedElement);
+            }
+        }
+
+        function dropToSource(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            if (draggedElement) {
+                document.getElementById('media-source').appendChild(draggedElement);
+                checkPlaceholder();
+            }
+        }
+
+        function checkPlaceholder() {
+            const dropZone = document.getElementById('drop-zone');
+            if (dropZone.querySelectorAll('.media-card').length === 0) {
+                dropZone.innerHTML = '<div class="drop-placeholder">ลากสื่อมาวางที่นี่เพื่อจับคู่</div>';
+            }
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                const percent = (timeLeft / 15) * 100;
+                document.getElementById('timer-fill').style.width = `${percent}%`;
+                document.getElementById('timer-display').innerText = `⏳ ${timeLeft} วินาที`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    processAnswer(true); // หมดเวลา
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer-display').innerText = `⏳ ${timeLeft} วินาที`;
+            document.getElementById('timer-fill').style.width = '100%';
+        }
+
+        function submitAnswer() {
+            clearInterval(timer);
+            processAnswer(false);
+        }
+
+        function processAnswer(isTimeout) {
+            const q = questions[currentIndex];
+            const dropZone = document.getElementById('drop-zone');
+            const placedCard = dropZone.querySelector('.media-card');
+            
+            let userSelected = placedCard ? placedCard.dataset.name : "";
+            let isCorrect = (userSelected === q.correctMedia && !isTimeout);
+
+            let questionScore = 0;
+            if (isCorrect) {
+                questionScore += 10;
+                // โบนัสทำเร็วภายใน 5 วินาทีแรก (เหลือเวลา >= 10)
+                if (timeLeft >= 10) {
+                    questionScore += 5;
+                }
+            } else {
+                questionScore -= 5; // ผิดหรือหมดเวลา หักคะแนน
+            }
+
+            score = Math.max(0, score + questionScore);
+
+            if (!isCorrect) {
+                mistakesLog.push({
+                    title: `ข้อที่ ${q.id}`,
+                    scenarioText: q.scenario,
+                    userAns: isTimeout ? "หมดเวลา" : (userSelected || "ไม่ได้เลือกจับคู่"),
+                    correctAns: q.correctMedia,
+                    reason: q.reason
+                });
+            }
+
+            currentIndex++;
+            loadQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+
+            const totalTimeSec = Math.floor((new Date() - totalStartTime) / 1000);
+            const mins = Math.floor(totalTimeSec / 60);
+            const secs = totalTimeSec % 60;
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('total-time').innerText = `${mins} นาที ${secs} วินาที`;
+
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+
+            if (mistakesLog.length > 0) {
+                let html = `
+                    <div class="review-section">
+                        <h3>❌ รายการข้อที่ต้องทบทวน (${mistakesLog.length} ข้อ)</h3>
+                `;
+                mistakesLog.forEach(m => {
+                    html += `
+                        <div class="review-item">
+                            <div><b>📌 ${m.title}:</b> <span style="color:var(--text-muted); font-size:0.85rem;">${m.scenarioText}</span></div>
+                            <div style="color: #e11d48; margin: 3px 0;">ที่คุณเลือก: ${m.userAns}</div>
+                            <div style="color: #059669;">✅ ที่ถูกต้อง: ${m.correctAns}</div>
+                            <div style="color: #475569; font-size: 0.85rem; margin-top: 4px;">💡 <b>เหตุผล:</b> ${m.reason}</div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                reviewContainer.innerHTML = html;
+            } else {
+                reviewContainer.innerHTML = `
+                    <div class="perfect-score-msg">
+                        🌟 ยอดเยี่ยมไร้ที่ติ! คุณเลือกรูปแบบสื่อได้แม่นยำถูกต้องทุกข้อ สมเป็นกูรูด้านสื่อดิจิทัลตัวจริง! 🏆
+                    </div>
+                `;
+            }
+
+            let evaluation = "";
+            let emoji = "🎉";
+            if (score >= 135) { evaluation = "👑 กูรูนักออกแบบสื่อดิจิทัลระดับมาสเตอร์"; emoji = "🚀"; }
+            else if (score >= 100) { evaluation = "💎 ผู้เชี่ยวชาญการเลือกสื่อเพื่อการนำเสนอ"; emoji = "✨"; }
+            else if (score >= 70) { evaluation = "📈 นักเรียนฝึกหัดระดับปานกลาง"; emoji = "💡"; }
+            else { evaluation = "📚 ควรทบทวนคุณสมบัติและข้อจำกัดของสื่อประเภทต่างๆ อีกครั้ง"; emoji = "🔄"; }
+
+            document.getElementById('evaluation-text').innerText = evaluation;
+            document.getElementById('result-emoji').innerText = emoji;
+        }
+    </script>
+</body>
+</html>
